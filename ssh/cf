@@ -11,9 +11,9 @@ function error_exit {
 }
 
 # Constants and variables
-DOMAIN="nt-vps.com"
-SUB_DOMAIN="NT-$(head /dev/urandom | tr -dc a-z0-9 | head -c 5).vipssh.online"
-CF_ID="foodv776@gmail.com"
+DOMAIN="topnet7hackers.space"
+SUB_DOMAIN="TOpNeT-$(head /dev/urandom | tr -dc a-z0-9 | head -c 5).topnet7hackers.space"
+CF_ID="he7him77@gmail.com"
 CF_KEY="ed22c2673b2e8ee27c776db85e6546f4a510c"  # Update with your API token
 IP=$(curl -s ipinfo.io/ip)
 API_URL="https://api.cloudflare.com/client/v4"
