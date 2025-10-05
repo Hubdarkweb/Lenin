@@ -14,10 +14,10 @@ function error_exit {
 DOMAIN="topnet7hackers.space"
 SUB_DOMAIN="TOpNeT-$(head /dev/urandom | tr -dc a-z0-9 | head -c 5).topnet7hackers.space"
 CF_ID="he7him77@gmail.com"
-CF_KEY="ed22c2673b2e8ee27c776db85e6546f4a510c"  # Update with your API token
+CF_KEY="1b4535022d76560b3e359e65c48a98488161e"  # Update with your API token
 IP=$(curl -s ipinfo.io/ip)
 API_URL="https://api.cloudflare.com/client/v4"
-ZONE_ID="195c976c61503b6d1d6cf1fec47edf0a"  # Update with your zone ID
+ZONE_ID="41334327abe530eeeeed52fee7652008"  # Update with your zone ID
 
 # Function to update DNS record in Cloudflare
 function update_dns_record {
