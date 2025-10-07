@@ -1,135 +1,159 @@
 #!/bin/bash
+# Cyberpunk Spider Panel — Hezpaty Edition 2025
+# Auto-detect Debian/Ubuntu + Dynamic ASCII Art + Unified Management Menu
 
-# Color Definitions
-clear
-y='\033[1;33m' # Yellow
-z="\033[96m" # Cyan
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+# ===================== COLORS =====================
+red='\033[0;31m'
 green='\033[0;32m'
-Blue="\033[0;34m"
-purple="\033[1;95m"
-grenbo="\e[92;1m"
-gray="\e[1;30m"
+yellow='\033[1;33m'
+blue='\033[0;34m'
+purple='\033[0;35m'
+cyan='\033[0;36m'
 white='\033[1;37m'
-bold="\033[1m"
-BG="\e[48;5;235m"
-blink="\033[5m"
-orange="\033[38;5;214m"
-maroon="\033[38;5;124m"
+gray='\033[0;37m'
+bold='\033[1m'
+nc='\033[0m'
+# ==================================================
 
-# Fetch System Information
-get_ram_info() {
-    ram_info=$(free -m | awk 'NR==2{print $2,$3}')
-    tram=$(echo "$ram_info" | awk '{print $1}')
-    uram=$(echo "$ram_info" | awk '{print $2}')
-    mem_used=$(printf "%.2f%%" "$(free | awk '/Mem/{printf $3/$2*100}')")
+# ===================== SYSTEM INFO =====================
+OS=$(hostnamectl | grep "Operating System" | cut -d ' ' -f5-)
+DISTRO=$(grep -w ID /etc/os-release | cut -d= -f2 | tr -d '"')
+CORE=$(nproc)
+RAM_TOTAL=$(free -m | awk 'NR==2{print $2}')
+RAM_USED=$(free -m | awk 'NR==2{print $3}')
+UPTIME=$(uptime -p | cut -d " " -f 2-10)
+DOMAIN=$(cat /etc/xray/domain 2>/dev/null || echo "Not Set")
+IP=$(curl -s ifconfig.me)
+ISP=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
+CITY=$(curl -s ipinfo.io/city)
+DATE=$(date +"%d/%m/%Y")
+TIME=$(date +"%H:%M:%S")
+# ========================================================
+
+# ===================== SERVICE STATUS =====================
+check_service() {
+    systemctl is-active --quiet "$1" && echo -e "${green}⛷️🛰️🎯${nc}" || echo -e "${red}☣️☣️☢️${nc}"
 }
 
-get_cpu_usage() {
-    cpu_usage=$(top -bn1 | awk '/Cpu/ {print 100 - $8}')
-    cpu_usage=$(printf "%.2f%%" "$cpu_usage")
-}
+status_ssh=$(check_service ssh)
+status_xray=$(check_service xray)
+status_dropbear=$(check_service dropbear)
+status_nginx=$(check_service nginx)
+status_haproxy=$(check_service haproxy)
+# ==================================================
 
-get_vps_info() {
-    domain=$(cat /etc/xray/domain 2>/dev/null || echo "Not Set")
-    uptime=$(uptime -p | cut -d " " -f 2-10)
-    ipvps=$(curl -s ifconfig.me)
-    loc=$(curl -sS "https://api.country.is/${ipvps}" | jq -r '.country')
-    loc=${loc:-Unknown}
-    os_name=$(hostnamectl | grep "Operating System" | cut -d ' ' -f5-)
-    date_vps=$(date +'%Y-%m-%d')
-    time_vps=$(date +"%H:%M:%S")
-}
+# ===================== HEADER =====================
+clear
+echo -e "${cyan}──────────────────────────────────────────────────────────────${nc}"
+echo -e "${yellow}>>>${white}${bold}  T_OpPLUG | CYBERPUNK SPIDER PANEL 🕷️ 2025 ${yellow}🗽💻📡🛰️🤿⛷️${nc}"
+echo -e "${cyan}──────────────────────────────────────────────────────────────${nc}"
+echo
+# ==================================================
 
-# ASCII Art for Ubuntu and Debian
-ubuntu_ascii() {
+# ===================== ASCII ART AUTO-DETECT =====================
+if [[ "$DISTRO" == "ubuntu" ]]; then
     echo -e "${purple}"
-    echo -e "           _"
-    echo -e "       ---${y}(_)${NC}${purple}"
-    echo -e "   _/  ---  \\"
-    echo -e "  (_) |   |"
-    echo -e "    \\  --- _/"
-    echo -e "       ---${z}(_)${NC}${purple}"
-    echo -e "${NC}"
-}
+    cat <<'EOF'
+           _
+       ---(_)
+   _/  ---  \
+  (_) |   |
+    \  --- _/
+       ---(_)
+EOF
+    echo -e "${nc}"
+elif [[ "$DISTRO" == "debian" ]]; then
+    echo -e "${red}"
+    cat <<'EOF'
+       ▄▄▄▄▄▄▄
+     ▄█████████▄
+    ███▀   ▀█████
+   ███        ███
+   ███▄      ▄███
+    █████▄▄█████
+      ▀███████▀
+EOF
+    echo -e "${nc}"
+else
+    echo -e "${blue}[!] Unknown Linux Distribution Detected${nc}"
+fi
+# ==================================================
 
-debian_ascii() {
-    echo -e "${maroon}"
-    echo -e "       _______"
-    echo -e "    .-'${orange}       '-.${maroon}"
-    echo -e "   /${orange}     Debian   \\${maroon}"
-    echo -e "  |                 |"
-    echo -e "   \\               /"
-    echo -e "    '-._______.-'"
-    echo -e "${NC}"
-}
+# ===================== SYSTEM DETAILS =====================
+echo -e "${purple} [🧠] SYSTEM OS${nc}       = ${yellow}$OS${nc}"
+echo -e "${purple} [⚙️] CORE SYSTEM${nc}     = ${yellow}$CORE${nc}"
+echo -e "${purple} [💾] SERVER RAM${nc}      = ${yellow}$RAM_USED/$RAM_TOTAL MB${nc}"
+echo -e "${purple} [⏳] SERVER UPTIME${nc}   = ${yellow}$UPTIME${nc}"
+echo -e "${purple} [🌐] DOMAIN${nc}          = ${yellow}$DOMAIN${nc}"
+echo -e "${purple} [📡] IP VPS${nc}          = ${yellow}$IP${nc}"
+echo -e "${purple} [🏢] ISP${nc}             = ${yellow}$ISP${nc}"
+echo -e "${purple} [📍] CITY${nc}            = ${yellow}$CITY${nc}"
+echo -e "${purple} [📅] DATE${nc}            = ${yellow}$DATE${nc}"
+echo -e "${purple} [⏰] TIME${nc}            = ${yellow}$TIME${nc}"
+echo
+# ==================================================
 
-# Display Banner with Multiple Containers
-show_banner() {
-    clear
-    get_vps_info
-    get_ram_info
-    get_cpu_usage
+# ===================== ACCOUNT STATUS =====================
+echo -e "${cyan}>>>${white}${bold} VPS ACCOUNT STATUS ${cyan}<<<${nc}"
+echo -e "${cyan}──────────────────────────────────────────────────────────────${nc}"
+echo -e "${green} SSH / OPENVPN     ${nc}➤ 2 PREMIUM ACCOUNTS"
+echo -e "${green} VMESS / WS / GRPC ${nc}➤ 0 PREMIUM ACCOUNTS"
+echo -e "${green} VLESS / WS / GRPC ${nc}➤ 0 PREMIUM ACCOUNTS"
+echo -e "${green} TROJAN / WS / GRPC${nc}➤ 0 PREMIUM ACCOUNTS"
+echo -e "${green} SHADOWSOCKS / WS  ${nc}➤ 0 PREMIUM ACCOUNTS"
+echo -e "${cyan}──────────────────────────────────────────────────────────────${nc}"
+echo
+# ==================================================
 
-    echo -e "${white}${bold}${BG}╭━━━━━━━━━━━━━━━━━━━━━━ BANNER 1 ━━━━━━━━━━━━━━━━━━━━━━━╮${NC}"
-    echo -e "${white}${bold}┃${NC} ${green}Operating System${NC}: $os_name                                 ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}${BG}╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯${NC}"
+# ===================== LIVE SERVICE STATUS =====================
+echo -e "${white}${bold}Service Status:${nc}"
+echo -e "  SSH       : $status_ssh      XRAY      : $status_xray"
+echo -e "  DROPBEAR  : $status_dropbear  NGINX     : $status_nginx"
+echo -e "  HAPROXY   : $status_haproxy"
+echo -e "${cyan}──────────────────────────────────────────────────────────────${nc}"
+echo
+# ==================================================
 
-    echo -e "${white}${bold}${BG}╭━━━━━━━━━━━━━━━━━━━━━━ BANNER 2 ━━━━━━━━━━━━━━━━━━━━━━━╮${NC}"
-    echo -e "${white}${bold}┃${NC} ${z}Ubuntu ASCII Art:${NC}"
-    ubuntu_ascii
-    echo -e "${white}${bold}┃${NC} ${z}Debian ASCII Art:${NC}"
-    debian_ascii
-    echo -e "${white}${bold}${BG}╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯${NC}"
+# ===================== MAIN CYBERPUNK MENU =====================
+echo -e "${yellow}${bold}[01]${nc} SSH / OVPN Menu         ${yellow}[09]${nc} Psiphon Manager"
+echo -e "${yellow}${bold}[02]${nc} Vmess Manager           ${yellow}[10]${nc} Zi-UDP Manager"
+echo -e "${yellow}${bold}[03]${nc} Vless Manager           ${yellow}[11]${nc} OpenVPN Manager"
+echo -e "${yellow}${bold}[04]${nc} Trojan Manager          ${yellow}[12]${nc} 3xUI Panel"
+echo -e "${yellow}${bold}[05]${nc} Shadowsocks Manager     ${yellow}[13]${nc} 1Panel Dashboard"
+echo -e "${yellow}${bold}[06]${nc} Limit Speed             ${yellow}[14]${nc} SlowDNS Control"
+echo -e "${yellow}${bold}[07]${nc} VPS Info                ${yellow}[15]${nc} Helium Panel"
+echo -e "${yellow}${bold}[08]${nc} Auto Reboot             ${yellow}[16]${nc} Settings"
+echo -e "${yellow}${bold}[17]${nc} Reboot VPS              ${yellow}[18]${nc} Clear Cache"
+echo -e "${yellow}${bold}[19]${nc} Running Services        ${yellow}[20]${nc} Backup / Restore"
+echo -e "${yellow}${bold}[21]${nc} Update Script           ${yellow}[22]${nc} Exit${nc}"
+echo -e "${cyan}──────────────────────────────────────────────────────────────${nc}"
+echo
+# ==================================================
 
-    echo -e "${white}${bold}${BG}╭━━━━━━━━━━━━━━━━━━━━━━ BANNER 3 ━━━━━━━━━━━━━━━━━━━━━━━╮${NC}"
-    echo -e "${white}${bold}┃${NC} ${z}MENU OPTIONS${NC}:"
-    echo -e "${white}${bold}┃${NC} ${z}[1]${NC} ${green}SSH Menu${NC}              ${z}[5]${NC} ${green}Settings${NC}        ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}┃${NC} ${z}[2]${NC} ${green}Vmess Menu${NC}            ${z}[6]${NC} ${green}Services Status${NC} ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}┃${NC} ${z}[3]${NC} ${green}Trojan Menu${NC}           ${z}[7]${NC} ${green}Clear RAM Cache${NC} ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}┃${NC} ${z}[4]${NC} ${green}Shadowsocks Menu${NC}      ${z}[8]${NC} ${green}Reboot VPS${NC}     ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}┃${NC} ${z}[0]${blink}${RED}Exit Menu${NC}                                 ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}${BG}╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯${NC}"
-
-    echo -e "${white}${bold}${BG}╭━━━━━━━━━━━━━━━━━━━━━━ BANNER 4 ━━━━━━━━━━━━━━━━━━━━━━━╮${NC}"
-    echo -e "${white}${bold}┃${NC} ${green}CPU Usage${NC}:    $cpu_usage                              ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}┃${NC} ${green}RAM Usage${NC}:    $uram MB / $tram MB (${mem_used})          ${white}${bold}┃${NC}"
-    echo -e "${white}${bold}${BG}╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯${NC}"
-
-    echo -e "${white}${bold}${BG}╭━━━━━━━━━━━━━━━━━━━━━━ BANNER 5 ━━━━━━━━━━━━━━━━━━━━━━━╮${NC}"
-    echo -e "${white}${bold}┃${NC} ${green}VPS Details${NC}:"
-    echo -e "${white}${bold}┃${NC} ${green}Domain${NC}:      $domain"
-    echo -e "${white}${bold}┃${NC} ${green}Public IP${NC}:   $ipvps"
-    echo -e "${white}${bold}┃${NC} ${green}Location${NC}:    $loc"
-    echo -e "${white}${bold}┃${NC} ${green}Uptime${NC}:      $uptime"
-    echo -e "${white}${bold}┃${NC} ${green}Date${NC}:        $date_vps"
-    echo -e "${white}${bold}┃${NC} ${green}Time${NC}:        $time_vps"
-    echo -e "${white}${bold}${BG}╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯${NC}"
-}
-
-# Display Menu
-show_menu() {
-    show_banner
-    echo
-    echo -ne "${z}Select an option:${NC} "
-    read -r opt
-    echo
-    case $opt in
-        1) clear ; m-sshovpn ;;
-        2) clear ; m-vmess ;;
-        3) clear ; m-trojan ;;
-        4) clear ; m-ssws ;;
-        5) clear ; m-system ;;
-        6) clear ; running ;;
-        7) clear ; clearcache ;;
-        8) clear ; /sbin/reboot ;;
-        0) echo -e "${RED}Exiting script... Goodbye!${NC}" && exit ;;
-        *) echo -e "${RED}Invalid selection! Try again.${NC}" && sleep 2 ;;
-    esac
-}
-
-# Main Loop
-while true; do
-    show_menu
-done
+read -p "Select an option: " opt
+case $opt in
+    1) clear; m-sshovpn ;;
+    2) clear; m-vmess ;;
+    3) clear; m-vless ;;
+    4) clear; m-trojan ;;
+    5) clear; m-ssws ;;
+    6) clear; limitspeed ;;
+    7) clear; gotop ;;
+    8) clear; autoreboot ;;
+    9) clear; m-psiphon ;;
+    10) clear; m-ziudp ;;
+    11) clear; m-openvpn ;;
+    12) clear; VERSION=v2.5.5 && bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION ;;
+    13) clear; bash -c "$(curl -sSL https://resource.1panel.pro/quick_start.sh)" ;;
+    14) clear; rm -rf install; apt update; wget https://github.com/powermx/dnstt/raw/main/install; chmod 777 install; ./install --start ;;
+    15) clear; apt update && apt install wget -y && wget -q -O /usr/bin/ins-helium "https://raw.githubusercontent.com/Hubdarkweb/Lenin/master/helium/ins-helium.sh" && chmod +x /usr/bin/ins-helium && ins-helium ;;
+    16) clear; m-system ;;
+    17) clear; reboot ;;
+    18) clear; clearcache ;;
+    19) clear; running ;;
+    20) clear; menu-backup ;;
+    21) clear; wget https://raw.githubusercontent.com/spider660/Lau_Op/main/update.sh && chmod +x update.sh && ./update.sh ;;
+    22) echo -e "${red}Exiting Cyberpunk Control Panel... Stay sharp ⚡${nc}"; exit ;;
+    *) echo -e "${red}Invalid Option!${nc}" ;;
+esac
+# ==================================================
