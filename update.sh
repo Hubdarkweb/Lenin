@@ -46,7 +46,7 @@ fun_bar() {
 }
 
 res1() {
-  wget -q https://raw.githubusercontent.com/Hubdarkweb/Lenin/main/menu.zip -O /tmp/menu.zip
+  wget -q https://raw.githubusercontent.com/Hubdarkweb/Lenin/main/menu/menu.zip -O /tmp/menu.zip
   unzip -o /tmp/menu.zip -d /tmp >/dev/null 2>&1
   chmod +x /tmp/menu/*
   mv /tmp/menu/* /usr/local/sbin/ 2>/dev/null || true
